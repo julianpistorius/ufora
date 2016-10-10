@@ -72,7 +72,8 @@ pyobjectwalkermodule = Extension('pyfora.pyobjectwalker',
                                           'pyfora/src/PyAstUtil.cpp',
                                           'pyfora/src/FreeVariableMemberAccessChain.cpp',
                                           'pyfora/src/PyAstFreeVariableAnalyses.cpp',
-                                          'pyfora/src/PyforaInspect.cpp'])
+                                          'pyfora/src/PyforaInspect.cpp',
+                                          'pyfora/src/Ast.cpp'])
 ext_modules.append(pyobjectwalkermodule)
 
 

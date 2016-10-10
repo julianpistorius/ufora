@@ -21,10 +21,23 @@
 
 PyAstFreeVariableAnalyses::PyAstFreeVariableAnalyses()
     : mPyAstFreeVariableAnalysesModule(NULL),
-      mGetFreeVariableMemberAccessChainsFun(NULL)
+      mGetFreeVariableMemberAccessChainsFun(NULL),
+      mVarWithPosition(NULL)
     {
     _initPyAstFreeVariableAnalysesModule();
     _initGetFreeVariableMemberAccessChainsFun();
+    _initVarWithPosition();
+    }
+
+
+void PyAstFreeVariableAnalyses::_initVarWithPosition()
+    {
+    mVarWithPosition = PyObject_GetAttrString(mPyAstFreeVariableAnalysesModule,
+                                              "VarWithPosition");
+    if (mVarWithPosition == NULL) {
+        throw std::logic_error("error getting VarWithPosition attr "
+                               "on PyAstFreeVariableAnalyses module");
+        }
     }
 
 
@@ -127,4 +140,52 @@ PyObject* PyAstFreeVariableAnalyses::getFreeMemberAccessChainsWithPositions(
     Py_DECREF(pyIsClassContext);
     
     return res;
+    }
+
+
+PyObject* PyAstFreeVariableAnalyses::collectBoundValuesInScope(
+        PyObject* pyAst,
+        bool getPositions
+        )
+    {
+    PyObject* collectBoundValuesInScopeFun = PyObject_GetAttrString(
+        _getInstance().mPyAstFreeVariableAnalysesModule,
+        "collectBoundValuesInScope"
+        );
+    if (collectBoundValuesInScopeFun == NULL) {
+        return NULL;
+        }
+
+    // don't need to decref this creature since we're using it as a temporary
+    PyObject* pyBool = (getPositions ? Py_True : Py_False);
+
+    PyObject* res = PyObject_CallMethodObjArgs(
+        collectBoundValuesInScopeFun,
+        pyAst,
+        pyBool
+        );
+
+    Py_DECREF(collectBoundValuesInScopeFun);
+
+    return res;
+    }
+
+
+PyObject* PyAstFreeVariableAnalyses::varWithPosition(const PyObject* var,
+                                                     const PyObject* pos)
+    {
+    PyObject* varTup = Py_BuildValue("(O)", var);
+    if (varTup == NULL) {
+        return NULL;
+        }
+
+    PyObject* tr = PyObject_CallMethodObjArgs(
+        _getInstance().mVarWithPosition,
+        varTup,
+        pos,
+        NULL);
+
+    Py_DECREF(varTup);
+
+    return tr;
     }
